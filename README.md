@@ -1,7 +1,7 @@
 # gotest 
 [![Build Status](https://travis-ci.org/claassen/gotest.svg?branch=master)](https://travis-ci.org/claassen/gotest) [![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/claassen/gotest)
 
-BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript. `gotest` is a complete replacement for the build in `go test` command.
+BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript. `gotest` is a complete replacement for the `go test` command.
 
 ## Installation
 
@@ -41,10 +41,7 @@ func Test() {
 	
 	It("Doesn't need to be nested in a Describe block", func() {
 		//Wrapping It blocks in Describe blocks is optional
-		
 		//It blocks may not contain Describe or It blocks
-		//Describe("this will not work", func() {})
-		//It("this will not work", func() { })
 	})
 }
 ```
@@ -76,7 +73,7 @@ func Test() {
 		
 		Describe("some additional behaviour", func() {
 			BeforeEach(func() {
-				
+				//Additional logic before each test in this Describe block
 			})
 			
 			It("does something for the initial behaviour plus the additional behaviour", func() {
