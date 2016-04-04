@@ -1,5 +1,5 @@
 # gotest 
-[![Build Status](https://travis-ci.org/claassen/gotest.svg?branch=master)](https://travis-ci.org/claassen/gotest)
+[![Build Status](https://travis-ci.org/claassen/gotest.svg?branch=master)](https://travis-ci.org/claassen/gotest) [![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/claassen/gotest)
 
 **gotest** is a BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript.
 
