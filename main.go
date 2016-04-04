@@ -196,6 +196,7 @@ func createTestMainPackage() {
 }
 
 func runTests() {
+
 	runCmd := exec.Command("go", "run", context.testMainFilePath)
 	runCmd.Stdout = os.Stdout
 	runCmd.Stderr = os.Stderr
@@ -206,6 +207,7 @@ func runTests() {
 }
 
 func cleanup() {
+
 	os.RemoveAll(context.testMainPackageDir)
 
 	for _, p := range context.testPackages {

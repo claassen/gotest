@@ -27,44 +27,6 @@ type Block struct {
 
 var t = TestContext{currentBlock: nil}
 
-func PrintMyTest(t TestContext) {
-	fmt.Println("Top level blocks:")
-	for _, x := range t.topLevelBlocks {
-		PrintBlock(*x, 0)
-	}
-}
-
-func PrintBlock(b Block, indent int) {
-	indentS := strings.Repeat(" ", indent)
-
-	fmt.Println(indentS, "Block: {")
-	fmt.Println(indentS, "  blockType: ", b.blockType)
-	fmt.Println(indentS, "  description: ", b.description)
-	fmt.Println(indentS, "  parent: ", b.parent)
-
-	fmt.Println(indentS, "  beforeEachs: [")
-	for _, x := range b.beforeEachs {
-		fmt.Println(indentS, "    ", x)
-	}
-	fmt.Println(indentS, "  ]")
-
-	fmt.Println(indentS, "  afterEachs: [")
-	for _, x := range b.afterEachs {
-		fmt.Println(indentS, "    ", x)
-	}
-	fmt.Println(indentS, "  ]")
-
-	fmt.Println(indentS, "  body: ", b.body)
-
-	fmt.Println(indentS, "  children: [")
-	for _, x := range b.children {
-		PrintBlock(*x, indent+4)
-	}
-	fmt.Println(indentS, "  ]")
-
-	fmt.Println(indentS, "}")
-}
-
 func (t *TestContext) AddBlock(block *Block) {
 	if t.currentBlock == nil {
 		t.topLevelBlocks = append(t.topLevelBlocks, block)
@@ -76,56 +38,6 @@ func (t *TestContext) AddBlock(block *Block) {
 		t.currentBlock.children = append(t.currentBlock.children, block)
 		block.parent = t.currentBlock
 	}
-}
-
-func (b Block) Run(testDescriptionPrefix string) {
-
-	testName := strings.TrimSpace(testDescriptionPrefix + " " + b.description)
-
-	if b.blockType == "describe" {
-		for _, childBlock := range b.children {
-
-			if childBlock.blockType == "it" {
-				for _, before := range b.beforeEachs {
-					before()
-				}
-			}
-
-			childBlock.Run(testName)
-
-			if childBlock.blockType == "it" {
-				for _, after := range b.afterEachs {
-					after()
-				}
-			}
-		}
-	} else {
-		runIt(b.body, testName)
-	}
-}
-
-func runIt(body func(), testName string) {
-	defer func() {
-		err := recover()
-
-		if err != nil {
-			fmt.Println(color.RedString("FAILED:"), testName)
-			errStr, ok := err.(string)
-			if ok {
-				fmt.Println(color.RedString(errStr))
-			} else {
-				fmt.Println(err)
-			}
-
-			t.failed++
-		}
-	}()
-
-	body()
-
-	fmt.Println(color.GreenString("PASSED:"), testName)
-
-	t.passed++
 }
 
 func Describe(desc string, processChildBlocks func()) {
@@ -166,6 +78,55 @@ func AfterEach(body func()) {
 		t.currentBlock.afterEachs = append(t.currentBlock.afterEachs, body)
 	} else {
 		panic("AfterEach may only be applied inside Describe blocks")
+	}
+}
+
+func runTest(body func(), testName string) {
+	defer func() {
+		err := recover()
+
+		if err != nil {
+			fmt.Println(color.RedString("FAILED:"), testName)
+			errStr, ok := err.(string)
+			if ok {
+				fmt.Println(color.RedString(errStr))
+			} else {
+				fmt.Println(err)
+			}
+
+			t.failed++
+		}
+	}()
+
+	body()
+
+	fmt.Println(color.GreenString("PASSED:"), testName)
+
+	t.passed++
+}
+
+func (b Block) Run(testDescriptionPrefix string) {
+	testName := strings.TrimSpace(testDescriptionPrefix + " " + b.description)
+
+	if b.blockType == "describe" {
+		for _, childBlock := range b.children {
+
+			if childBlock.blockType == "it" {
+				for _, before := range b.beforeEachs {
+					before()
+				}
+			}
+
+			childBlock.Run(testName)
+
+			if childBlock.blockType == "it" {
+				for _, after := range b.afterEachs {
+					after()
+				}
+			}
+		}
+	} else {
+		runTest(b.body, testName)
 	}
 }
 
