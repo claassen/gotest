@@ -1,7 +1,7 @@
 # gotest 
 [![Build Status](https://travis-ci.org/claassen/gotest.svg?branch=master)](https://travis-ci.org/claassen/gotest) [![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/claassen/gotest)
 
-**gotest** is a BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript.
+BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript. `gotest` is a complete replacement for the build in `go test` command.
 
 ## Installation
 
@@ -16,7 +16,7 @@ Test file names follow the standard Go practice of matching the pattern *_test.g
 
 Test files differ from the requirement for the `go test` tool in that test functions need not follow the Test* pattern and should not accept any arguments. Test functions must be publicly visible (start with a capital letter).
 
-A test file can have multiple functions but typically you would only have one function and instead use `Describe` and `It` blocks to separate tests.
+A test file can have multiple functions but typically you would only have one function and instead use `Describe` and `It` blocks to organize tests.
 
 ### Simple Example
 
@@ -121,4 +121,6 @@ gotest my/package
 ```
 
 This will find and run tests in the package specified as well tests in any packages which are sub-directories of the specified package.
+
+Note that the format of functions in test files required for using `gotest` will not work with `go test`.
 
