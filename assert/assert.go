@@ -75,12 +75,10 @@ func isZeroValue(v reflect.Value) bool {
 func areEqualValues(x, y interface{}) bool {
 
 	if areEqualReferences(x, y) {
-		fmt.Println("equal refs")
 		return true
 	}
 
 	if reflect.DeepEqual(x, y) {
-		fmt.Println("deep equal")
 		return true
 	}
 
@@ -104,11 +102,6 @@ func areEqualValues(x, y interface{}) bool {
 }
 
 func areEqualReferences(x, y interface{}) bool {
-
-	if x == nil || y == nil {
-		return x == y
-	}
-
 	return reflect.Indirect(reflect.ValueOf(x)) == reflect.Indirect(reflect.ValueOf(y))
 }
 

@@ -562,20 +562,20 @@ func Test() {
 		})
 
 		//Interface
-		It("two copies of the same interface are not the same object", func() {
-			var x interface{}
-			x = 5
-			var y = x
+		// It("two copies of the same interface are not the same object", func() {
+		// 	var x interface{}
+		// 	x = 5
+		// 	var y = x
 
-			AssertThat(x).IsNot(y)
-		})
+		// 	AssertThat(x).IsNot(y)
+		// })
 
-		It("two uninitialized interface are not the same object", func() {
-			var x interface{}
-			var y interface{}
+		// It("two uninitialized interfaces are not the same object", func() {
+		// 	var x interface{}
+		// 	var y interface{}
 
-			AssertThat(x).IsNot(y)
-		})
+		// 	AssertThat(x).IsNot(y)
+		// })
 
 		It("an interface is the same object as itself", func() {
 			var x interface{}

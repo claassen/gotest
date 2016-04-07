@@ -1,7 +1,7 @@
 # gotest 
 [![Build Status](https://travis-ci.org/claassen/gotest.svg?branch=master)](https://travis-ci.org/claassen/gotest) [![GoDoc](https://godoc.org/github.com/tools/godep?status.svg)](https://godoc.org/github.com/claassen/gotest)
 
-BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript. `gotest` is a complete replacement for the `go test` command.
+BDD testing framework for Go in the style of the Jasmine BDD testing framework for Javascript. `gotest` is a complete replacement for the `go test` command. No initialization or bootstrapping of tests is required.
 
 ## Installation
 
