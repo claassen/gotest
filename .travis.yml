@@ -7,4 +7,4 @@ go:
   - tip
   
 script:
-  - go run cmd/gotest/main.go github.com/claassen/gotest
+  - gotest github.com/claassen/gotest
