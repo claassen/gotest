@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/claassen/gotest/testing",
+	"ImportPath": "github.com/claassen/gotest",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v60",
 	"Deps": [
