@@ -7,4 +7,5 @@ go:
   - tip
   
 script:
+  - GO15VENDOREXPERIMENT=0
   - go run cmd/gotest/main.go github.com/claassen/gotest
