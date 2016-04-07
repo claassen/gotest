@@ -24,7 +24,7 @@ A test file can have multiple functions but typically you would only have one fu
 package mypackage
 
 import(
-	. "claassen/gotest/testing"
+	. "claassen/gotest"
 )
 
 func Test() {
@@ -52,7 +52,7 @@ func Test() {
 package mypackage
 
 import(
-	. "claassen/gotest/testing"
+	. "claassen/gotest"
 )
 
 func Test() {
@@ -93,8 +93,8 @@ func Test() {
 package mypackage
 
 import(
-	. "claassen/gotest/testing"
-	. "claassen/gotest/testing/assertions"
+	. "claassen/gotest"
+	. "claassen/gotest/assert"
 )
 
 func Test() {
