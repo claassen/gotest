@@ -173,7 +173,7 @@ func createTestMainPackage() {
 
 	fmt.Fprintln(testMainWriter, "package main")
 	fmt.Fprintln(testMainWriter, "import(")
-	fmt.Fprintln(testMainWriter, "\"github.com/claassen/gotest/testing\"")
+	fmt.Fprintln(testMainWriter, "\"github.com/claassen/gotest\"")
 
 	for _, p := range context.testPackages {
 		fmt.Fprintln(testMainWriter, "\""+p.testPackageFullName+"\"")

@@ -63,30 +63,93 @@ func Fail(message string) {
 	fail(message)
 }
 
+func isZeroValue(v reflect.Value) bool {
+    switch v.Kind() {
+    case reflect.Func, reflect.Map, reflect.Slice, reflect.Chan, reflect.Interface, reflect.Ptr:
+        return v.IsNil()
+    }
+    
+    return false
+}
+
+func areEqualValues(x, y interface{}) bool {
+
+	if areEqualReferences(x, y) {
+		fmt.Println("equal refs")
+		return true
+	}
+
+	if reflect.DeepEqual(x, y) {
+		fmt.Println("deep equal")
+		return true
+	}
+
+	//nil interface value will have nil type
+	tx := reflect.TypeOf(x)
+	ty := reflect.TypeOf(y)
+
+	vx := reflect.ValueOf(x)
+	vy := reflect.ValueOf(y)
+
+	//Check for zero values for types which can be assigned nil and consider those to equal nil
+	if (x == nil && isZeroValue(vy)) || (y == nil && isZeroValue(vx)) {
+		return true
+	}
+
+	if tx != nil && ty != nil && tx.ConvertibleTo(ty) {
+		return reflect.DeepEqual(vx.Convert(ty).Interface(), y)
+	}
+
+	return false
+}
+
+func areEqualReferences(x, y interface{}) bool {
+
+	if x == nil || y == nil {
+		return x == y
+	}
+
+	return reflect.Indirect(reflect.ValueOf(x)) == reflect.Indirect(reflect.ValueOf(y))
+}
+
 func (v AssertValue) IsNil() {
-	if v.value != nil {
-		message := fmt.Sprintf("Expected %#v to be nil.")
+	if !areEqualValues(v.value, nil) {
+		message := fmt.Sprintf("Expected %#v to be nil.", v.value)
 		fail(message)
 	}
 }
 
 func (v AssertValue) IsNotNil() {
-	if v.value == nil {
-		message := fmt.Sprintf("Expected %#v to not be nil.")
+	if areEqualValues(v.value, nil) {
+		message := fmt.Sprintf("Expected %#v to not be nil.", v.value)
 		fail(message)
 	}
 }
 
 func (e AssertValue) IsEqualTo(expected interface{}) {
-	if e.value != expected {
+	if !areEqualValues(e.value, expected) {
 		message := fmt.Sprintf("Expected %#v to be equal to %#v.", expected, e.value)
 		fail(message)
 	}
 }
 
 func (e AssertValue) IsNotEqualTo(expected interface{}) {
-	if e.value == expected {
+	if areEqualValues(e.value, expected) {
 		message := fmt.Sprintf("Expected %#v to not be equal to %#v.", expected, e.value)
+		fail(message)
+	}
+}
+
+func (e AssertValue) Is(expected interface{}) {
+	if !areEqualReferences(e.value, expected) {
+		message := fmt.Sprintf("Expected %#v to be the same object as %#v", expected, e.value)
+		fail(message)
+	}
+}
+
+func (e AssertValue) IsNot(expected interface{}) {
+	if areEqualReferences(e.value, expected) {
+		message := fmt.Sprintf("Expected %#v to not be the same object as %#v", expected, e.value)
 		fail(message)
 	}
 }
