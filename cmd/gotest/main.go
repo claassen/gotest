@@ -32,7 +32,8 @@ type TestPackageInfo struct {
 }
 
 var context = TestContext{}
-var goPath = strings.Split(os.ExpandEnv("$GOPATH"), ":")[0]
+var goPaths = strings.Split(os.ExpandEnv("$GOPATH"), ":") 
+var goPath = goPaths[len(goPaths)-1]
 var goPathSrc = filepath.Join(goPath, "src")
 
 func processDir(path string) {
