@@ -4,7 +4,7 @@ sudo: false
 
 go:
   - 1.6
-  - tip
+  - release
   
 script:
   - gotest github.com/claassen/gotest
