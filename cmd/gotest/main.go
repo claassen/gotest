@@ -38,6 +38,8 @@ var goPathSrc = filepath.Join(goPath, "src")
 
 func processDir(path string) {
 
+	fmt.Println("Processing:", path)
+
 	testPackageInfo := TestPackageInfo{}
 	testPackageInfo.originalPackageName = filepath.Base(path)
 	testPackageInfo.originalPackagePath = path
@@ -56,7 +58,7 @@ func processDir(path string) {
 
 	for _, f := range files {
 		if f.IsDir() {
-			if f.Name() != "vendor" && f.Name() != ".git" {
+			if f.Name() != "vendor" && f.Name() != ".git" && f.Name() != "Godeps" {
 				processDir(filepath.Join(path, f.Name()))
 			}
 		} else if filepath.Ext(f.Name()) == ".go" {
@@ -116,11 +118,16 @@ func createTestPackages() {
 
 	for _, p := range context.testPackages {
 
+		fmt.Println("Creating test package:", p.originalPackageName)
+
 		if err := os.MkdirAll(p.testPackagePath, os.ModePerm); err != nil {
 			fmt.Println("Error creating temp test package path ", p.testPackagePath, ":", err)
 		}
 
 		for _, fileName := range p.goFileNames {
+
+			fmt.Println("Copying file:", fileName)
+
 			originalFileFullPath := filepath.Join(p.originalPackagePath, fileName)
 			copiedFileFullPath := filepath.Join(p.testPackagePath, strings.Replace(fileName, "_test.go", "_testx.go", 1))
 
@@ -197,6 +204,8 @@ func createTestMainPackage() {
 }
 
 func runTests() {
+
+	fmt.Println("Running tests with command: go run", context.testMainFilePath)
 
 	runCmd := exec.Command("go", "run", context.testMainFilePath)
 	runCmd.Stdout = os.Stdout
