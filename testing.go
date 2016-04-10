@@ -7,27 +7,27 @@ import (
 	"strings"
 )
 
-type TestContext struct {
-	currentBlock       *Block
-	topLevelBlocks     []*Block
+type testContext struct {
+	currentBlock       *block
+	topLevelBlocks     []*block
 	currentRunningTest string
 	passed             int
 	failed             int
 }
 
-type Block struct {
+type block struct {
 	blockType   string
 	description string
-	parent      *Block
-	children    []*Block
+	parent      *block
+	children    []*block
 	beforeEachs []func()
 	afterEachs  []func()
 	body        func()
 }
 
-var t = TestContext{currentBlock: nil}
+var t = testContext{currentBlock: nil}
 
-func (t *TestContext) AddBlock(block *Block) {
+func (t *testContext) addBlock(block *block) {
 	if t.currentBlock == nil {
 		t.topLevelBlocks = append(t.topLevelBlocks, block)
 	} else {
@@ -41,26 +41,26 @@ func (t *TestContext) AddBlock(block *Block) {
 }
 
 func Describe(desc string, processChildBlocks func()) {
-	block := Block{blockType: "describe", description: desc, parent: t.currentBlock}
+	b := block{blockType: "describe", description: desc, parent: t.currentBlock}
 
-	t.AddBlock(&block)
-	t.currentBlock = &block
+	t.addBlock(&b)
+	t.currentBlock = &b
 
 	processChildBlocks()
 
 	//Reset current block after processing top level block
-	if block.parent == nil {
+	if b.parent == nil {
 		t.currentBlock = nil
 	}
 }
 
 func It(desc string, body func()) {
-	block := Block{blockType: "it", description: desc, parent: t.currentBlock, body: body}
+	b := block{blockType: "it", description: desc, parent: t.currentBlock, body: body}
 
-	t.AddBlock(&block)
+	t.addBlock(&b)
 
 	//Reset current block after processing top level block
-	if block.parent == nil {
+	if b.parent == nil {
 		t.currentBlock = nil
 	}
 }
@@ -105,7 +105,7 @@ func runTest(body func(), testName string) {
 	t.passed++
 }
 
-func (b Block) Run(testDescriptionPrefix string) {
+func (b block) run(testDescriptionPrefix string) {
 	testName := strings.TrimSpace(testDescriptionPrefix + " " + b.description)
 
 	if b.blockType == "describe" {
@@ -117,7 +117,7 @@ func (b Block) Run(testDescriptionPrefix string) {
 				}
 			}
 
-			childBlock.Run(testName)
+			childBlock.run(testName)
 
 			if childBlock.blockType == "it" {
 				for _, after := range b.afterEachs {
@@ -134,7 +134,7 @@ func RunTests() {
 	fmt.Println("Running tests...")
 
 	for _, b := range t.topLevelBlocks {
-		b.Run("")
+		b.run("")
 	}
 
 	fmt.Println("-----------")
