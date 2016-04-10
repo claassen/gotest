@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+type blockType uint
+
+const (
+	describe blockType = iota
+	it
+)
+
 type testContext struct {
 	currentBlock       *block
 	topLevelBlocks     []*block
@@ -16,7 +23,7 @@ type testContext struct {
 }
 
 type block struct {
-	blockType   string
+	blockType   blockType
 	description string
 	parent      *block
 	children    []*block
@@ -41,7 +48,7 @@ func (t *testContext) addBlock(block *block) {
 }
 
 func Describe(desc string, processChildBlocks func()) {
-	b := block{blockType: "describe", description: desc, parent: t.currentBlock}
+	b := block{blockType: describe, description: desc, parent: t.currentBlock}
 
 	t.addBlock(&b)
 	t.currentBlock = &b
@@ -55,7 +62,7 @@ func Describe(desc string, processChildBlocks func()) {
 }
 
 func It(desc string, body func()) {
-	b := block{blockType: "it", description: desc, parent: t.currentBlock, body: body}
+	b := block{blockType: it, description: desc, parent: t.currentBlock, body: body}
 
 	t.addBlock(&b)
 
@@ -66,7 +73,7 @@ func It(desc string, body func()) {
 }
 
 func BeforeEach(body func()) {
-	if t.currentBlock.blockType == "describe" {
+	if t.currentBlock.blockType == describe {
 		t.currentBlock.beforeEachs = append(t.currentBlock.beforeEachs, body)
 	} else {
 		panic("BeforeEach may only be applied inside Describe blocks")
@@ -74,7 +81,7 @@ func BeforeEach(body func()) {
 }
 
 func AfterEach(body func()) {
-	if t.currentBlock.blockType == "describe" {
+	if t.currentBlock.blockType == describe {
 		t.currentBlock.afterEachs = append(t.currentBlock.afterEachs, body)
 	} else {
 		panic("AfterEach may only be applied inside Describe blocks")
@@ -108,10 +115,10 @@ func runTest(body func(), testName string) {
 func (b block) run(testDescriptionPrefix string) {
 	testName := strings.TrimSpace(testDescriptionPrefix + " " + b.description)
 
-	if b.blockType == "describe" {
+	if b.blockType == describe {
 		for _, childBlock := range b.children {
 
-			if childBlock.blockType == "it" {
+			if childBlock.blockType == it {
 				for _, before := range b.beforeEachs {
 					before()
 				}
@@ -119,7 +126,7 @@ func (b block) run(testDescriptionPrefix string) {
 
 			childBlock.run(testName)
 
-			if childBlock.blockType == "it" {
+			if childBlock.blockType == it {
 				for _, after := range b.afterEachs {
 					after()
 				}
