@@ -73,7 +73,6 @@ func isZeroValue(v reflect.Value) bool {
 }
 
 func areEqualValues(x, y interface{}) bool {
-
 	if areEqualReferences(x, y) {
 		return true
 	}
@@ -148,7 +147,6 @@ func (e AssertValue) IsNot(expected interface{}) {
 }
 
 func panics(f func()) bool {
-
 	didPanic := false
 
 	func() {

@@ -32,19 +32,42 @@ type TestPackageInfo struct {
 }
 
 var context = TestContext{}
-var goPaths = strings.Split(os.ExpandEnv("$GOPATH"), ":") 
-var goPath = goPaths[len(goPaths)-1]
-var goPathSrc = filepath.Join(goPath, "src")
+var goPath = ""
+
+func pathExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	} else {
+		return true
+	}
+}
+
+func findPackagePath() bool {
+	goPaths := strings.Split(os.ExpandEnv("$GOPATH"), ":")
+
+	foundPackage := false
+
+	for _, path := range goPaths {
+
+		packagePath := filepath.Join(filepath.Join(path, "src"), context.rootPackageName)
+
+		if pathExists(packagePath) {
+			goPath = path
+			context.rootPackageFullPath = packagePath
+			foundPackage = true
+			break
+		}
+	}
+
+	return foundPackage
+}
 
 func processDir(path string) {
-
-	fmt.Println("Processing:", path)
-
 	testPackageInfo := TestPackageInfo{}
 	testPackageInfo.originalPackageName = filepath.Base(path)
 	testPackageInfo.originalPackagePath = path
 	testPackageInfo.testPackageName = filepath.Base(path) + "__test"
-	testPackageInfo.testPackageFullName = strings.TrimLeft(strings.Replace(path, goPathSrc, "", 1)+"/"+testPackageInfo.testPackageName, "/")
+	testPackageInfo.testPackageFullName = strings.TrimLeft(strings.Replace(path, filepath.Join(goPath, "src"), "", 1)+"/"+testPackageInfo.testPackageName, "/")
 	testPackageInfo.testPackagePath = filepath.Join(testPackageInfo.originalPackagePath, testPackageInfo.testPackageName)
 
 	includePackage := false
@@ -52,8 +75,7 @@ func processDir(path string) {
 	files, err := ioutil.ReadDir(path)
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	for _, f := range files {
@@ -71,7 +93,7 @@ func processDir(path string) {
 				f, parseErr := parser.ParseFile(fset, filepath.Join(path, f.Name()), nil, 0)
 
 				if parseErr != nil {
-					fmt.Println(parseErr)
+					panic(parseErr)
 				}
 
 				if f.Name.Name == "main" {
@@ -115,31 +137,26 @@ func processDir(path string) {
 }
 
 func createTestPackages() {
-
 	for _, p := range context.testPackages {
 
-		fmt.Println("Creating test package:", p.originalPackageName)
-
 		if err := os.MkdirAll(p.testPackagePath, os.ModePerm); err != nil {
-			fmt.Println("Error creating temp test package path ", p.testPackagePath, ":", err)
+			panic(fmt.Sprintf("Error creating temp test package path %s : %s", p.testPackagePath, err))
 		}
 
 		for _, fileName := range p.goFileNames {
-
-			fmt.Println("Copying file:", fileName)
 
 			originalFileFullPath := filepath.Join(p.originalPackagePath, fileName)
 			copiedFileFullPath := filepath.Join(p.testPackagePath, strings.Replace(fileName, "_test.go", "_testx.go", 1))
 
 			originalFile, err1 := os.Open(originalFileFullPath)
 			if err1 != nil {
-				fmt.Println("Error opening file ", originalFileFullPath, ":", err1)
+				panic(fmt.Sprintf("Error opening file %s : %s", originalFileFullPath, err1))
 			}
 			defer originalFile.Close()
 
 			copiedFile, err2 := os.Create(copiedFileFullPath)
 			if err2 != nil {
-				fmt.Println("Error creating file copy ", copiedFileFullPath, ":", err2)
+				panic(fmt.Sprintf("Error creating file copy %s : %s", copiedFileFullPath, err2))
 			}
 			defer copiedFile.Close()
 
@@ -162,18 +179,17 @@ func createTestPackages() {
 }
 
 func createTestMainPackage() {
-
 	context.testMainPackageDir = filepath.Join(context.rootPackageFullPath, "__testmain")
 
 	if err := os.MkdirAll(context.testMainPackageDir, os.ModePerm); err != nil {
-		fmt.Println("Error creating __testmain directory: ", err)
+		panic(fmt.Sprintf("Error creating __testmain directory: %s", err))
 	}
 
 	context.testMainFilePath = filepath.Join(context.testMainPackageDir, "testmain.go")
 	testMainFile, err := os.Create(context.testMainFilePath)
 
 	if err != nil {
-		fmt.Println("Error creating testmain.go:", err)
+		panic(fmt.Sprintf("Error creating testmain.go: %s", err))
 	}
 	defer testMainFile.Close()
 
@@ -204,20 +220,16 @@ func createTestMainPackage() {
 }
 
 func runTests() {
-
-	fmt.Println("Running tests with command: go run", context.testMainFilePath)
-
 	runCmd := exec.Command("go", "run", context.testMainFilePath)
 	runCmd.Stdout = os.Stdout
 	runCmd.Stderr = os.Stderr
 
 	if err := runCmd.Run(); err != nil {
-		fmt.Println(err)
+		panic (err)
 	}
 }
 
 func cleanup() {
-
 	os.RemoveAll(context.testMainPackageDir)
 
 	for _, p := range context.testPackages {
@@ -227,12 +239,26 @@ func cleanup() {
 
 func main() {
 
+	defer func() {
+		cleanup()
+
+		err := recover()
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}()
+
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: gotest <package name>")
 	}
 
 	context.rootPackageName = os.Args[1]
-	context.rootPackageFullPath = os.ExpandEnv(filepath.Join(goPathSrc, context.rootPackageName))
+
+	if !findPackagePath() {
+		panic(fmt.Sprintf("Could not find package: %s", context.rootPackageName))
+	}
 
 	processDir(context.rootPackageFullPath)
 
@@ -241,6 +267,4 @@ func main() {
 	createTestMainPackage()
 
 	runTests()
-
-	cleanup()
 }
