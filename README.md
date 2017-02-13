@@ -87,7 +87,7 @@ func Test() {
 
 ### Assertions
 
-**gotest** includes a fluent assertions library. The framework depends on assertions to simply panic in order to indicate assertion failure in case you want to try to plugin in a different assertions library. See the [https://godoc.org/github.com/claassen/gotest/assert](Godocs) for documentation.
+**gotest** includes a fluent assertions library. The framework depends on assertions to simply panic in order to indicate assertion failure in case you want to try to plugin in a different assertions library. See the [Godocs]([https://godoc.org/github.com/claassen/gotest/assert) for documentation.
 
 ```go
 package mypackage
